@@ -52,6 +52,27 @@ properties:
   "#io-channel-cells":
     const: 1
 
+  nxp,calib-avg-en:
+    default: 1
+    description:
+      Enable or disable averaging of calibration time (AVGEN).
+    $ref: /schemas/types.yaml#/definitions/uint32
+    enum: [ 0, 1 ]
+
+  nxp,calib-nr-samples:
+    default: 512
+    description:
+      Selects the number of averaging samples (NRSMPL) to be used during calibration.
+    $ref: /schemas/types.yaml#/definitions/uint32
+    enum: [ 16, 32, 128, 512 ]
+
+  nxp,calib-t-sample:
+    default: 22
+    description:
+      Specifies the sample time (TSAMP) of calibration conversions in ADC clock cycles
+    $ref: /schemas/types.yaml#/definitions/uint32
+    enum: [ 8, 16, 22, 32 ]
+
 required:
   - compatible
   - reg

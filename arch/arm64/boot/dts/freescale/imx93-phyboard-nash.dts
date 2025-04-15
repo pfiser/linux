@@ -61,6 +61,7 @@
 /* ADC */
 &adc1 {
 	vref-supply = <&reg_vref_1v8>;
+	nxp,calib-nr-samples = <16>;
 	status = "okay";
 };
 

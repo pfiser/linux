@@ -58,6 +58,7 @@
 
 /* ADC */
 &adc1 {
+	nxp,calib-nr-samples = <32>;
 	status = "okay";
 };
 

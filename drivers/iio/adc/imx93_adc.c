@@ -234,6 +234,8 @@ static int imx93_adc_calibration(struct imx93_adc *adc)
 		return ret;
 	}
 
+	dev_warn(adc->dev, "CALSTAT = 0x%08x\n", readl(adc->regs + IMX93_ADC_CALSTAT));
+
 	/* check whether calbration is success or not */
 	msr = readl(adc->regs + IMX93_ADC_MSR);
 	if (msr & IMX93_ADC_MSR_CALFAIL_MASK) {

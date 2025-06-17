@@ -39,6 +39,7 @@
 #define IMX93_ADC_PCDR6		0x118
 #define IMX93_ADC_PCDR7		0x11c
 #define IMX93_ADC_CALSTAT	0x39C
+#define IMX93_ADC_CALCFG0	0x3A0
 
 /* ADC bit shift */
 #define IMX93_ADC_MCR_MODE_MASK			BIT(29)
@@ -160,6 +161,18 @@ static int imx93_adc_calibration(struct imx93_adc *adc)
 	mcr &= ~FIELD_PREP(IMX93_ADC_MCR_ADCLKSE_MASK, 1);
 	writel(mcr, adc->regs + IMX93_ADC_MCR);
 
+	/* Not sure which value is proper count, start from zero. */
+	u8 bndflcnt = 0;
+recalibration:
+	mcr = readl(adc->regs + IMX93_ADC_CALCFG0);
+	dev_info(adc->dev, "IMX93_ADC_CALCFG0=0x%x - previous\n", mcr);
+	mcr &= ~(0xF << 8);
+	mcr |= (bndflcnt << 8);
+	writel(mcr, adc->regs + IMX93_ADC_CALCFG0);
+	mcr = readl(adc->regs + IMX93_ADC_CALCFG0);
+	dev_info(adc->dev, "IMX93_ADC_CALCFG0=0x%x, bndflcnt=%d\n", mcr, bndflcnt);
+	bndflcnt++;
+
 	/*
 	 * Set calibration settings in MCR:
 	 * - AVGEN: allow averaging of calibration time,
@@ -241,7 +254,9 @@ static int imx93_adc_calibration(struct imx93_adc *adc)
 	if (msr & IMX93_ADC_MSR_CALFAIL_MASK) {
 		dev_warn(adc->dev, "ADC calibration failed!\n");
 		imx93_adc_power_down(adc);
-		return -EAGAIN;
+		goto recalibration;
+	} else {
+		dev_info(adc->dev, "ADC calibration success!\n");
 	}
 
 	return 0;

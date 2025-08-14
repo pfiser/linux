@@ -272,6 +272,21 @@ properties:
           - const: ti,dra74
           - const: ti,dra7
 
+      # PHYTEC AM57xx boards
+      - description: PHYTEC AM57x phyCORE RDK
+        items:
+          - enum:
+              - phytec,am57xx-pcm-948  # AM57XX PHYTEC PCM-948
+          - const: phytec,am57xx-phycore-som
+          - const: ti,dra7
+
+      - description: PHYTEC AM572x phyCORE SoM
+        items:
+          - const: phytec,am572x-phycore-som
+          - const: ti,am5728
+          - const: ti,dra74
+          - const: ti,dra7
+
 additionalProperties: true
 
 ...

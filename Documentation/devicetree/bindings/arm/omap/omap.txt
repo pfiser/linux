@@ -41,41 +41,12 @@ SoC Type (optional):
 
 SoC Families:
 
-- DRA7 generic - defaults to DRA742
-  compatible = "ti,dra7"
 - AM33x generic
   compatible = "ti,am33xx"
 - AM43x generic - defaults to AM4372
   compatible = "ti,am43"
 
 SoCs:
-
-- DRA762
-  compatible = "ti,dra762", "ti,dra7"
-
-- DRA742
-  compatible = "ti,dra742", "ti,dra74", "ti,dra7"
-
-- DRA722
-  compatible = "ti,dra722", "ti,dra72", "ti,dra7"
-
-- DRA718
-  compatible = "ti,dra718", "ti,dra722", "ti,dra72", "ti,dra7"
-
-- AM5748
-  compatible = "ti,am5748", "ti,dra762", "ti,dra7"
-
-- AM5728
-  compatible = "ti,am5728", "ti,dra742", "ti,dra74", "ti,dra7"
-
-- AM5726
-  compatible = "ti,am5726", "ti,dra742", "ti,dra74", "ti,dra7"
-
-- AM5718
-  compatible = "ti,am5718", "ti,dra722", "ti,dra72", "ti,dra7"
-
-- AM5716
-  compatible = "ti,am5716", "ti,dra722", "ti,dra72", "ti,dra7"
 
 - AM4372
   compatible = "ti,am4372", "ti,am43"
@@ -97,30 +68,3 @@ Boards (incomplete list of examples):
 
 - AM437x SK EVM: AM437x StarterKit Evaluation Module
   compatible = "ti,am437x-sk-evm", "ti,am4372", "ti,am43"
-
-- AM57XX CL-SOM-AM57x
-  compatible = "compulab,cl-som-am57x", "ti,am5728", "ti,dra742", "ti,dra74", "ti,dra7"
-
-- AM57XX SBC-AM57x
-  compatible = "compulab,sbc-am57x", "compulab,cl-som-am57x", "ti,am5728", "ti,dra742", "ti,dra74", "ti,dra7"
-
-- AM5748 IDK
-  compatible = "ti,am5748-idk", "ti,am5748", "ti,dra762", "ti,dra7";
-
-- AM5728 IDK
-  compatible = "ti,am5728-idk", "ti,am5728", "ti,dra742", "ti,dra74", "ti,dra7"
-
-- AM5718 IDK
-  compatible = "ti,am5718-idk", "ti,am5718", "ti,dra7"
-
-- DRA762 EVM:  Software Development Board for DRA762
-  compatible = "ti,dra76-evm", "ti,dra762", "ti,dra7"
-
-- DRA742 EVM:  Software Development Board for DRA742
-  compatible = "ti,dra7-evm", "ti,dra742", "ti,dra74", "ti,dra7"
-
-- DRA722 EVM: Software Development Board for DRA722
-  compatible = "ti,dra72-evm", "ti,dra722", "ti,dra72", "ti,dra7"
-
-- DRA718 EVM: Software Development Board for DRA718
-  compatible = "ti,dra718-evm", "ti,dra718", "ti,dra722", "ti,dra72", "ti,dra7"

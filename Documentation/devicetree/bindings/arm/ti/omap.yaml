@@ -181,6 +181,97 @@ properties:
               - ti,omap5-uevm
           - const: ti,omap5
 
+      - description: TI DRA762 SoC based platforms
+        items:
+          - enum:
+              - ti,dra76-evm  # Software Development Board for DRA762
+          - const: ti,dra762
+          - const: ti,dra7
+
+      - description: TI DRA742 SoC based platforms
+        items:
+          - enum:
+              - ti,dra7-evm   # Software Development Board for DRA742
+          - const: ti,dra742
+          - const: ti,dra74
+          - const: ti,dra7
+
+      - description: TI DRA722 SoC based platforms
+        items:
+          - enum:
+              - ti,dra72-evm  # Software Development Board for DRA722
+          - const: ti,dra722
+          - const: ti,dra72
+          - const: ti,dra7
+
+      - description: TI DRA718 SoC based platforms
+        items:
+          - enum:
+              - ti,dra718-evm # Software Development Board for DRA718
+          - const: ti,dra718
+          - const: ti,dra722
+          - const: ti,dra72
+          - const: ti,dra7
+
+      - description: TI AM5748 SoC based platforms
+        items:
+          - enum:
+              - ti,am5748-idk  # AM5748 IDK
+          - const: ti,am5748
+          - const: ti,dra762
+          - const: ti,dra7
+
+      - description: TI AM5728 SoC based platforms
+        items:
+          - enum:
+              - ti,am5728-idk  # AM5728 IDK
+          - const: ti,am5728
+          - const: ti,dra742
+          - const: ti,dra74
+          - const: ti,dra7
+
+      - description: TI AM5726 SoC based platforms
+        items:
+          - const: ti,am5726
+          - const: ti,dra742
+          - const: ti,dra74
+          - const: ti,dra7
+
+      - description: TI AM5718 SoC based platforms
+        items:
+          - enum:
+              - ti,am5718-idk  # AM5718 IDK
+          - const: ti,am5718
+          - const: ti,dra722
+          - const: ti,dra72
+          - const: ti,dra7
+
+      - description: TI AM5716 SoC based platforms
+        items:
+          - const: ti,am5716
+          - const: ti,dra722
+          - const: ti,dra72
+          - const: ti,dra7
+
+      # CompuLab AM57xx boards
+      - description: CompuLab CL-SOM-AM57x boards
+        items:
+          - enum:
+              - compulab,sbc-am57x  # AM57XX SBC-AM57x
+          - const: compulab,cl-som-am57x
+          - const: ti,am5728
+          - const: ti,dra742
+          - const: ti,dra74
+          - const: ti,dra7
+
+      - description: CompuLab CL-SOM-AM57x SoM
+        items:
+          - const: compulab,cl-som-am57x
+          - const: ti,am5728
+          - const: ti,dra742
+          - const: ti,dra74
+          - const: ti,dra7
+
 additionalProperties: true
 
 ...

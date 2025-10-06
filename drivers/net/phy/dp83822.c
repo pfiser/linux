@@ -1084,7 +1084,7 @@ static unsigned long dp8382x_led_val_to_rules(int val)
 	}
 }
 
-static int dp83822_led_hw_is_supported(struct phy_device *phydev, u8 index,
+static int dp8382x_led_hw_is_supported(struct phy_device *phydev, u8 index,
 				       unsigned long rules)
 {
 	int mode;
@@ -1165,7 +1165,7 @@ static int dp83822_led_hw_control_get(struct phy_device *phydev, u8 index,
 		.handle_interrupt = dp83822_handle_interrupt,	\
 		.suspend = dp83822_suspend,			\
 		.resume = dp83822_resume,			\
-		.led_hw_is_supported = dp83822_led_hw_is_supported,	\
+		.led_hw_is_supported = dp8382x_led_hw_is_supported,	\
 		.led_hw_control_set = dp83822_led_hw_control_set,	\
 		.led_hw_control_get = dp83822_led_hw_control_get,	\
 	}

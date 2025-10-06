@@ -29,6 +29,7 @@
 #define MII_DP83822_MISR2	0x13
 #define MII_DP83822_FCSCR	0x14
 #define MII_DP83822_RCSR	0x17
+#define MII_DP83822_LEDCR	0x18
 #define MII_DP83822_RESET_CTRL	0x1f
 #define MII_DP83822_MLEDCR	0x25
 #define MII_DP83822_LDCTRL	0x403
@@ -38,6 +39,7 @@
 #define MII_DP83822_IOCTRL2	0x463
 #define MII_DP83822_GENCFG	0x465
 #define MII_DP83822_SOR1	0x467
+#define MII_DP83822_LEDCFG2	0x469
 
 /* DP83826 specific registers */
 #define MII_DP83826_LED2_GPIO_CFG	0x305
@@ -1306,6 +1308,52 @@ static int dp83825_led_hw_control_get(struct phy_device *phydev, u8 index,
 	return 0;
 }
 
+static int dp83825_led_polarity_set(struct phy_device *phydev, int index,
+				    unsigned long modes)
+{
+	bool force_active_low = false, force_active_high = false;
+	u32 mode;
+	u16 reg;
+	u16 bit;
+
+	/* Determine requested polarity modes */
+	for_each_set_bit(mode, &modes, __PHY_LED_MODES_NUM) {
+		switch (mode) {
+		case PHY_LED_ACTIVE_LOW:
+			force_active_low = true;
+			break;
+		case PHY_LED_ACTIVE_HIGH:
+			force_active_high = true;
+			break;
+		default:
+			return -EINVAL;
+		}
+	}
+
+	/* Map LED index to register/bit */
+	switch (index) {
+	case DP83825_LED_INDEX_LED_0:
+		reg = MII_DP83822_LEDCR;
+		bit = BIT(7);
+		break;
+	case DP83825_LED_INDEX_LED_2:
+		reg = MII_DP83822_LEDCFG2;
+		bit = BIT(6);
+		break;
+	default:
+		return -EINVAL;
+	}
+
+	/* Apply polarity setting */
+	if (force_active_low)
+		return phy_clear_bits_mmd(phydev, MDIO_MMD_VEND2, reg, bit);
+
+	if (force_active_high)
+		return phy_set_bits_mmd(phydev, MDIO_MMD_VEND2, reg, bit);
+
+	return 0;
+}
+
 #define DP83822_PHY_DRIVER(_id, _name)				\
 	{							\
 		PHY_ID_MATCH_MODEL(_id),			\
@@ -1343,6 +1391,7 @@ static int dp83825_led_hw_control_get(struct phy_device *phydev, u8 index,
 		.led_hw_is_supported = dp8382x_led_hw_is_supported,	\
 		.led_hw_control_set = dp83825_led_hw_control_set,	\
 		.led_hw_control_get = dp83825_led_hw_control_get,	\
+		.led_polarity_set = dp83825_led_polarity_set \
 	}
 
 #define DP83826_PHY_DRIVER(_id, _name)				\

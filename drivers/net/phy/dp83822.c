@@ -40,6 +40,7 @@
 #define MII_DP83822_SOR1	0x467
 
 /* DP83826 specific registers */
+#define MII_DP83826_LED2_GPIO_CFG	0x305
 #define MII_DP83826_VOD_CFG1	0x30b
 #define MII_DP83826_VOD_CFG2	0x30c
 
@@ -171,6 +172,10 @@
 #define DP83822_RX_ER_STR_MASK	GENMASK(9, 8)
 #define DP83822_RX_ER_SHIFT	8
 
+/* DP83826: LED2_GPIO_CFG */
+#define DP83826_LED2_GPIO_CFG_CTRL		GENMASK(2, 0)
+#define DP83826_LED2_GPIO_CFG_CTRL_LED2	BIT(0)
+
 /* DP83826: VOD_CFG1 & VOD_CFG2 */
 #define DP83826_VOD_CFG1_MINUS_MDIX_MASK	GENMASK(13, 12)
 #define DP83826_VOD_CFG1_MINUS_MDI_MASK		GENMASK(11, 6)
@@ -194,6 +199,9 @@
 #define DP83822_LED_INDEX_LED_1_GPIO1	1
 #define DP83822_LED_INDEX_COL_GPIO2	2
 #define DP83822_LED_INDEX_RX_D3_GPIO3	3
+
+#define DP83825_LED_INDEX_LED_0	0
+#define DP83825_LED_INDEX_LED_2	1
 
 struct dp83822_private {
 	bool fx_signal_det_low;
@@ -715,10 +723,40 @@ static int dp83826_config_init(struct phy_device *phydev)
 	return dp83822_config_wol(phydev, &dp83822->wol);
 }
 
+static int dp83825_config_init_leds(struct phy_device *phydev)
+{
+	struct dp83822_private *dp83822 = phydev->priv;
+	int ret;
+
+	if (dp83822->led_pin_enable[DP83825_LED_INDEX_LED_0]) {
+		ret = phy_modify_mmd(phydev, MDIO_MMD_VEND2, MII_DP83822_MLEDCR,
+				     DP83822_MLEDCR_ROUTE,
+				     FIELD_PREP(DP83822_MLEDCR_ROUTE,
+						DP83822_MLEDCR_ROUTE_LED_0));
+		if (ret)
+			return ret;
+	}
+
+	if (dp83822->led_pin_enable[DP83825_LED_INDEX_LED_2]) {
+		ret = phy_modify_mmd(phydev, MDIO_MMD_VEND2, MII_DP83826_LED2_GPIO_CFG,
+				     DP83826_LED2_GPIO_CFG_CTRL,
+				     FIELD_PREP(DP83826_LED2_GPIO_CFG_CTRL,
+						DP83826_LED2_GPIO_CFG_CTRL_LED2));
+		if (ret)
+			return ret;
+	}
+
+	return 0;
+}
+
 static int dp83825_config_init(struct phy_device *phydev)
 {
 	struct dp83822_private *dp83822 = phydev->priv;
 	int ret;
+
+	ret = dp83825_config_init_leds(phydev);
+	if (ret)
+		return ret;
 
 	ret = dp8382x_config_rmii_mode(phydev);
 	if (ret)
@@ -884,6 +922,57 @@ static int dp83822_of_init(struct phy_device *phydev)
 	return dp83822_of_init_leds(phydev);
 }
 
+static int dp83825_of_init_leds(struct phy_device *phydev)
+{
+	struct device_node *node = phydev->mdio.dev.of_node;
+	struct dp83822_private *dp83822 = phydev->priv;
+	struct device_node *leds;
+	const char *of_val;
+	u32 index;
+	int err;
+
+	if (!node)
+		return 0;
+
+	leds = of_get_child_by_name(node, "leds");
+	if (!leds)
+		return 0;
+
+	for_each_available_child_of_node_scoped(leds, led) {
+		err = of_property_read_u32(led, "reg", &index);
+		if (err) {
+			of_node_put(leds);
+			return err;
+		}
+
+		if (index <= DP83825_LED_INDEX_LED_2) {
+			dp83822->led_pin_enable[index] = true;
+		} else {
+			of_node_put(leds);
+			return -EINVAL;
+		}
+	}
+
+	of_node_put(leds);
+
+	/* LED_2 is clkout50m in master mode, cannot be used */
+	if (dp83822->led_pin_enable[DP83825_LED_INDEX_LED_2]) {
+		if (!device_property_read_string(&phydev->mdio.dev, "ti,rmii-mode", &of_val)) {
+			if (strcmp(of_val, "master") == 0) {
+				phydev_err(phydev, "LED_2 cannot be used when in master mode\n");
+				return -EINVAL;
+			}
+		}
+	}
+
+	return 0;
+}
+
+static int dp83825_of_init(struct phy_device *phydev)
+{
+	return dp83825_of_init_leds(phydev);
+}
+
 static int dp83826_to_dac_minus_one_regval(int percent)
 {
 	int tmp = DP83826_CFG_DAC_PERCENT_DEFAULT - percent;
@@ -916,6 +1005,10 @@ static void dp83826_of_init(struct phy_device *phydev)
 static int dp83822_of_init(struct phy_device *phydev)
 {
 	return 0;
+}
+
+static void dp8382x_of_init(struct phy_device *phydev)
+{
 }
 
 static void dp83826_of_init(struct phy_device *phydev)
@@ -987,6 +1080,21 @@ static int dp83822_probe(struct phy_device *phydev)
 
 	if (dp83822->fx_enabled)
 		phydev->port = PORT_FIBRE;
+
+	return 0;
+}
+
+static int dp83825_probe(struct phy_device *phydev)
+{
+	int ret;
+
+	ret = dp8382x_probe(phydev);
+	if (ret)
+		return ret;
+
+	dp83825_of_init(phydev);
+	if (ret)
+		return ret;
 
 	return 0;
 }
@@ -1150,6 +1258,54 @@ static int dp83822_led_hw_control_get(struct phy_device *phydev, u8 index,
 	return 0;
 }
 
+static int dp83825_led_hw_control_set(struct phy_device *phydev, u8 index,
+				      unsigned long rules)
+{
+	int mode;
+
+	mode = dp83822_led_mode(index, rules);
+	if (mode < 0)
+		return mode;
+
+	if (index == DP83825_LED_INDEX_LED_0)
+		return phy_modify_mmd(phydev, MDIO_MMD_VEND2,
+				      MII_DP83822_MLEDCR, DP83822_MLEDCR_CFG,
+				      FIELD_PREP(DP83822_MLEDCR_CFG, mode));
+
+	if (index == DP83825_LED_INDEX_LED_2)
+		return phy_modify_mmd(phydev, MDIO_MMD_VEND2,
+				      MII_DP83822_LEDCFG1, DP83822_LEDCFG1_LED3_CTRL,
+				      FIELD_PREP(DP83822_LEDCFG1_LED3_CTRL, mode));
+	return 0;
+}
+
+static int dp83825_led_hw_control_get(struct phy_device *phydev, u8 index,
+				      unsigned long *rules)
+{
+	int val;
+
+	/* TODO: Check if correct */
+	if (index == DP83825_LED_INDEX_LED_0) {
+		val = phy_read_mmd(phydev, MDIO_MMD_VEND2, MII_DP83822_MLEDCR);
+		if (val < 0)
+			return val;
+
+		val = FIELD_GET(DP83822_MLEDCR_CFG, val);
+	}
+
+	if (index == DP83825_LED_INDEX_LED_2) {
+		val = phy_read_mmd(phydev, MDIO_MMD_VEND2, MII_DP83822_LEDCFG1);
+		if (val < 0)
+			return val;
+
+		val = FIELD_GET(DP83822_LEDCFG1_LED3_CTRL, val);
+	}
+
+	*rules = dp8382x_led_val_to_rules(val);
+
+	return 0;
+}
+
 #define DP83822_PHY_DRIVER(_id, _name)				\
 	{							\
 		PHY_ID_MATCH_MODEL(_id),			\
@@ -1175,7 +1331,7 @@ static int dp83822_led_hw_control_get(struct phy_device *phydev, u8 index,
 		PHY_ID_MATCH_MODEL(_id),			\
 		.name		= (_name),			\
 		/* PHY_BASIC_FEATURES */			\
-		.probe          = dp8382x_probe,		\
+		.probe          = dp83825_probe,		\
 		.soft_reset	= dp83822_phy_reset,		\
 		.config_init	= dp83825_config_init,		\
 		.get_wol = dp83822_get_wol,			\
@@ -1184,6 +1340,9 @@ static int dp83822_led_hw_control_get(struct phy_device *phydev, u8 index,
 		.handle_interrupt = dp83822_handle_interrupt,	\
 		.suspend = dp83822_suspend,			\
 		.resume = dp83822_resume,			\
+		.led_hw_is_supported = dp8382x_led_hw_is_supported,	\
+		.led_hw_control_set = dp83825_led_hw_control_set,	\
+		.led_hw_control_get = dp83825_led_hw_control_get,	\
 	}
 
 #define DP83826_PHY_DRIVER(_id, _name)				\

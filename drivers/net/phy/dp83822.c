@@ -1056,6 +1056,34 @@ static int dp83822_led_mode(u8 index, unsigned long rules)
 	}
 }
 
+static unsigned long dp8382x_led_val_to_rules(int val)
+{
+	switch (val) {
+	case DP83822_LED_FN_LINK:
+		return BIT(TRIGGER_NETDEV_LINK);
+	case DP83822_LED_FN_LINK_10_BT:
+		return BIT(TRIGGER_NETDEV_LINK_10);
+	case DP83822_LED_FN_LINK_100_BTX:
+		return BIT(TRIGGER_NETDEV_LINK_100);
+	case DP83822_LED_FN_FULL_DUPLEX:
+		return BIT(TRIGGER_NETDEV_FULL_DUPLEX);
+	case DP83822_LED_FN_TX:
+		return BIT(TRIGGER_NETDEV_TX);
+	case DP83822_LED_FN_RX:
+		return BIT(TRIGGER_NETDEV_RX);
+	case DP83822_LED_FN_RX_TX:
+		return BIT(TRIGGER_NETDEV_TX) | BIT(TRIGGER_NETDEV_RX);
+	case DP83822_LED_FN_RX_TX_ERR:
+		return BIT(TRIGGER_NETDEV_TX_ERR) | BIT(TRIGGER_NETDEV_RX_ERR);
+	case DP83822_LED_FN_LINK_RX_TX:
+		return BIT(TRIGGER_NETDEV_LINK) |
+			   BIT(TRIGGER_NETDEV_TX) |
+			   BIT(TRIGGER_NETDEV_RX);
+	default:
+		return 0;
+	}
+}
+
 static int dp83822_led_hw_is_supported(struct phy_device *phydev, u8 index,
 				       unsigned long rules)
 {
@@ -1117,39 +1145,7 @@ static int dp83822_led_hw_control_get(struct phy_device *phydev, u8 index,
 			val = FIELD_GET(DP83822_LEDCFG1_LED3_CTRL, val);
 	}
 
-	switch (val) {
-	case DP83822_LED_FN_LINK:
-		*rules = BIT(TRIGGER_NETDEV_LINK);
-		break;
-	case DP83822_LED_FN_LINK_10_BT:
-		*rules = BIT(TRIGGER_NETDEV_LINK_10);
-		break;
-	case DP83822_LED_FN_LINK_100_BTX:
-		*rules = BIT(TRIGGER_NETDEV_LINK_100);
-		break;
-	case DP83822_LED_FN_FULL_DUPLEX:
-		*rules = BIT(TRIGGER_NETDEV_FULL_DUPLEX);
-		break;
-	case DP83822_LED_FN_TX:
-		*rules = BIT(TRIGGER_NETDEV_TX);
-		break;
-	case DP83822_LED_FN_RX:
-		*rules = BIT(TRIGGER_NETDEV_RX);
-		break;
-	case DP83822_LED_FN_RX_TX:
-		*rules = BIT(TRIGGER_NETDEV_TX) | BIT(TRIGGER_NETDEV_RX);
-		break;
-	case DP83822_LED_FN_RX_TX_ERR:
-		*rules = BIT(TRIGGER_NETDEV_TX_ERR) | BIT(TRIGGER_NETDEV_RX_ERR);
-		break;
-	case DP83822_LED_FN_LINK_RX_TX:
-		*rules = BIT(TRIGGER_NETDEV_LINK) | BIT(TRIGGER_NETDEV_TX) |
-			 BIT(TRIGGER_NETDEV_RX);
-		break;
-	default:
-		*rules = 0;
-		break;
-	}
+	*rules = dp8382x_led_val_to_rules(val);
 
 	return 0;
 }

@@ -1409,6 +1409,17 @@ int phy_init_hw(struct phy_device *phydev)
 			return ret;
 	}
 
+	if (phydev->drv->led_polarity_set) {
+		struct phy_led *phyled, *tmp;
+
+		list_for_each_entry_safe(phyled, tmp, &phydev->leds, list) {
+			ret = phydev->drv->led_polarity_set(phydev, phyled->index,
+							    phyled->modes);
+			if (ret)
+				return ret;
+		}
+	}
+
 	return 0;
 }
 EXPORT_SYMBOL(phy_init_hw);
@@ -3231,16 +3242,7 @@ static int of_phy_led(struct phy_device *phydev,
 		    modes & BIT(PHY_LED_ACTIVE_HIGH)))
 		return -EINVAL;
 
-	if (modes) {
-		/* Return error if asked to set polarity modes but not supported */
-		if (!phydev->drv->led_polarity_set)
-			return -EINVAL;
-
-		err = phydev->drv->led_polarity_set(phydev, index, modes);
-		if (err)
-			return err;
-	}
-
+	phyled->modes = modes;
 	phyled->index = index;
 	if (phydev->drv->led_brightness_set)
 		cdev->brightness_set_blocking = phy_led_set_brightness;

@@ -887,12 +887,14 @@ enum phy_led_modes {
  * @list: List of LEDs
  * @phydev: PHY this LED is attached to
  * @led_cdev: Standard LED class structure
+ * @modes: Bitmap of LED polarity modes
  * @index: Number of the LED
  */
 struct phy_led {
 	struct list_head list;
 	struct phy_device *phydev;
 	struct led_classdev led_cdev;
+	unsigned long modes;
 	u8 index;
 };
 

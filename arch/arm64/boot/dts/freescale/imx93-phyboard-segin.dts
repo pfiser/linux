@@ -100,6 +100,18 @@
 };
 
 /* Ethernet */
+&ethphy1 {
+	leds {
+		led@0 {
+			active-low;
+		};
+
+		led@1 {
+			active-low;
+		};
+	};
+};
+
 &eqos {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_eqos>;

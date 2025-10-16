@@ -756,6 +756,8 @@ static int dp83825_config_init(struct phy_device *phydev)
 	struct dp83822_private *dp83822 = phydev->priv;
 	int ret;
 
+	phydev_info(phydev, "(LINE %d) %s\n", __LINE__, __func__);
+
 	ret = dp83825_config_init_leds(phydev);
 	if (ret)
 		return ret;
@@ -770,6 +772,8 @@ static int dp83825_config_init(struct phy_device *phydev)
 static int dp83822_phy_reset(struct phy_device *phydev)
 {
 	int err;
+
+	phydev_info(phydev, "(LINE %d) %s\n", __LINE__, __func__);
 
 	err = phy_write(phydev, MII_DP83822_RESET_CTRL, DP83822_SW_RESET);
 	if (err < 0)
@@ -1265,9 +1269,13 @@ static int dp83825_led_hw_control_set(struct phy_device *phydev, u8 index,
 {
 	int mode;
 
+	phydev_info(phydev, "(LINE %d) %s\n", __LINE__, __func__);
+
 	mode = dp83822_led_mode(index, rules);
 	if (mode < 0)
 		return mode;
+
+	phydev_info(phydev, "(LINE %d) %s index = %d mode = 0x%04X\n", __LINE__, __func__, index, mode);
 
 	if (index == DP83825_LED_INDEX_LED_0)
 		return phy_modify_mmd(phydev, MDIO_MMD_VEND2,
@@ -1285,6 +1293,8 @@ static int dp83825_led_hw_control_get(struct phy_device *phydev, u8 index,
 				      unsigned long *rules)
 {
 	int val;
+
+	phydev_info(phydev, "(LINE %d) %s\n", __LINE__, __func__);
 
 	/* TODO: Check if correct */
 	if (index == DP83825_LED_INDEX_LED_0) {
@@ -1305,6 +1315,9 @@ static int dp83825_led_hw_control_get(struct phy_device *phydev, u8 index,
 
 	*rules = dp8382x_led_val_to_rules(val);
 
+	phydev_info(phydev, "(LINE %d) %s index = %d val = 0x%02X, rules = 0x%04lX\n",
+		__LINE__, __func__, index, val, *rules);
+
 	return 0;
 }
 
@@ -1315,6 +1328,8 @@ static int dp83825_led_polarity_set(struct phy_device *phydev, int index,
 	u32 mode;
 	u16 reg;
 	u16 bit;
+
+	phydev_info(phydev, "(LINE %d) %s\n", __LINE__, __func__);
 
 	/* Determine requested polarity modes */
 	for_each_set_bit(mode, &modes, __PHY_LED_MODES_NUM) {
@@ -1329,6 +1344,9 @@ static int dp83825_led_polarity_set(struct phy_device *phydev, int index,
 			return -EINVAL;
 		}
 	}
+
+	phydev_info(phydev, "(LINE %d) %s index = %d low=%d high=%d\n",
+		__LINE__, __func__, index, force_active_low, force_active_high);
 
 	/* Map LED index to register/bit */
 	switch (index) {

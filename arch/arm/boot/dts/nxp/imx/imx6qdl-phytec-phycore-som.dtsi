@@ -65,6 +65,7 @@
 		ethphy: ethernet-phy@3 {
 			reg = <3>;
 			reset-gpios = <&gpio1 14 GPIO_ACTIVE_LOW>;
+			reset-assert-us = <10000>;
 			txc-skew-ps = <1680>;
 			rxc-skew-ps = <1860>;
 		};

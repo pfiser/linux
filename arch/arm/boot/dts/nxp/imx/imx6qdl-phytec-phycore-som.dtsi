@@ -56,7 +56,6 @@
 	phy-handle = <&ethphy>;
 	phy-mode = "rgmii";
 	phy-supply = <&vdd_eth_io>;
-	phy-reset-gpios = <&gpio1 14 GPIO_ACTIVE_LOW>;
 	status = "disabled";
 
 	mdio {
@@ -65,6 +64,7 @@
 
 		ethphy: ethernet-phy@3 {
 			reg = <3>;
+			reset-gpios = <&gpio1 14 GPIO_ACTIVE_LOW>;
 			txc-skew-ps = <1680>;
 			rxc-skew-ps = <1860>;
 		};

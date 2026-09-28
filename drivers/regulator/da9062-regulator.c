@@ -98,6 +98,20 @@ static const unsigned int da9062_buck_b_limits[] = {
 	2300000, 2400000, 2500000, 2600000, 2700000, 2800000, 2900000, 3000000
 };
 
+/*
+ * Buck DVC slew rate, in uV/us (CONTROL_C, SLEW_RATE field).
+ * Entry indexes correspond to register values.
+ *
+ * SLEW_RATE is a single field shared by all bucks: there is no per-buck
+ * slew rate register. Setting regulator-ramp-delay on more than one buck
+ * with different values only takes effect for whichever buck's ramp
+ * delay is configured last during probe; all bucks share the resulting
+ * rate.
+ */
+static const unsigned int da9062_buck_ramp_table[] = {
+	2500, 5000, 10000, 20000
+};
+
 static unsigned int da9062_map_buck_mode(unsigned int mode)
 {
 	switch (mode) {
@@ -336,6 +350,7 @@ static const struct regulator_ops da9062_buck_ops = {
 	.set_suspend_enable	= da9062_suspend_enable,
 	.set_suspend_disable	= da9062_suspend_disable,
 	.set_suspend_mode	= da9062_buck_set_suspend_mode,
+	.set_ramp_delay		= regulator_set_ramp_delay_regmap,
 };
 
 static const struct regulator_ops da9062_ldo_ops = {
@@ -374,6 +389,10 @@ static const struct da9062_regulator_info local_da9061_regulator_info[] = {
 		.desc.vsel_reg = DA9062AA_VBUCK1_A,
 		.desc.vsel_mask = DA9062AA_VBUCK1_A_MASK,
 		.desc.linear_min_sel = 0,
+		.desc.ramp_reg = DA9062AA_CONTROL_C,
+		.desc.ramp_mask = DA9062AA_SLEW_RATE_MASK,
+		.desc.ramp_delay_table = da9062_buck_ramp_table,
+		.desc.n_ramp_values = ARRAY_SIZE(da9062_buck_ramp_table),
 		.desc.of_map_mode = da9062_map_buck_mode,
 		.sleep = REG_FIELD(DA9062AA_VBUCK1_A,
 			__builtin_ffs((int)DA9062AA_BUCK1_SL_A_MASK) - 1,
@@ -411,6 +430,10 @@ static const struct da9062_regulator_info local_da9061_regulator_info[] = {
 		.desc.vsel_reg = DA9062AA_VBUCK3_A,
 		.desc.vsel_mask = DA9062AA_VBUCK3_A_MASK,
 		.desc.linear_min_sel = 0,
+		.desc.ramp_reg = DA9062AA_CONTROL_C,
+		.desc.ramp_mask = DA9062AA_SLEW_RATE_MASK,
+		.desc.ramp_delay_table = da9062_buck_ramp_table,
+		.desc.n_ramp_values = ARRAY_SIZE(da9062_buck_ramp_table),
 		.desc.of_map_mode = da9062_map_buck_mode,
 		.sleep = REG_FIELD(DA9062AA_VBUCK3_A,
 			__builtin_ffs((int)DA9062AA_BUCK3_SL_A_MASK) - 1,
@@ -448,6 +471,10 @@ static const struct da9062_regulator_info local_da9061_regulator_info[] = {
 		.desc.vsel_reg = DA9062AA_VBUCK4_A,
 		.desc.vsel_mask = DA9062AA_VBUCK4_A_MASK,
 		.desc.linear_min_sel = 0,
+		.desc.ramp_reg = DA9062AA_CONTROL_C,
+		.desc.ramp_mask = DA9062AA_SLEW_RATE_MASK,
+		.desc.ramp_delay_table = da9062_buck_ramp_table,
+		.desc.n_ramp_values = ARRAY_SIZE(da9062_buck_ramp_table),
 		.desc.of_map_mode = da9062_map_buck_mode,
 		.sleep = REG_FIELD(DA9062AA_VBUCK4_A,
 			__builtin_ffs((int)DA9062AA_BUCK4_SL_A_MASK) - 1,
@@ -621,6 +648,10 @@ static const struct da9062_regulator_info local_da9062_regulator_info[] = {
 		.desc.vsel_reg = DA9062AA_VBUCK1_A,
 		.desc.vsel_mask = DA9062AA_VBUCK1_A_MASK,
 		.desc.linear_min_sel = 0,
+		.desc.ramp_reg = DA9062AA_CONTROL_C,
+		.desc.ramp_mask = DA9062AA_SLEW_RATE_MASK,
+		.desc.ramp_delay_table = da9062_buck_ramp_table,
+		.desc.n_ramp_values = ARRAY_SIZE(da9062_buck_ramp_table),
 		.desc.of_map_mode = da9062_map_buck_mode,
 		.sleep = REG_FIELD(DA9062AA_VBUCK1_A,
 			__builtin_ffs((int)DA9062AA_BUCK1_SL_A_MASK) - 1,
@@ -658,6 +689,10 @@ static const struct da9062_regulator_info local_da9062_regulator_info[] = {
 		.desc.vsel_reg = DA9062AA_VBUCK2_A,
 		.desc.vsel_mask = DA9062AA_VBUCK2_A_MASK,
 		.desc.linear_min_sel = 0,
+		.desc.ramp_reg = DA9062AA_CONTROL_C,
+		.desc.ramp_mask = DA9062AA_SLEW_RATE_MASK,
+		.desc.ramp_delay_table = da9062_buck_ramp_table,
+		.desc.n_ramp_values = ARRAY_SIZE(da9062_buck_ramp_table),
 		.desc.of_map_mode = da9062_map_buck_mode,
 		.sleep = REG_FIELD(DA9062AA_VBUCK2_A,
 			__builtin_ffs((int)DA9062AA_BUCK2_SL_A_MASK) - 1,
@@ -695,6 +730,10 @@ static const struct da9062_regulator_info local_da9062_regulator_info[] = {
 		.desc.vsel_reg = DA9062AA_VBUCK3_A,
 		.desc.vsel_mask = DA9062AA_VBUCK3_A_MASK,
 		.desc.linear_min_sel = 0,
+		.desc.ramp_reg = DA9062AA_CONTROL_C,
+		.desc.ramp_mask = DA9062AA_SLEW_RATE_MASK,
+		.desc.ramp_delay_table = da9062_buck_ramp_table,
+		.desc.n_ramp_values = ARRAY_SIZE(da9062_buck_ramp_table),
 		.desc.of_map_mode = da9062_map_buck_mode,
 		.sleep = REG_FIELD(DA9062AA_VBUCK3_A,
 			__builtin_ffs((int)DA9062AA_BUCK3_SL_A_MASK) - 1,
@@ -732,6 +771,10 @@ static const struct da9062_regulator_info local_da9062_regulator_info[] = {
 		.desc.vsel_reg = DA9062AA_VBUCK4_A,
 		.desc.vsel_mask = DA9062AA_VBUCK4_A_MASK,
 		.desc.linear_min_sel = 0,
+		.desc.ramp_reg = DA9062AA_CONTROL_C,
+		.desc.ramp_mask = DA9062AA_SLEW_RATE_MASK,
+		.desc.ramp_delay_table = da9062_buck_ramp_table,
+		.desc.n_ramp_values = ARRAY_SIZE(da9062_buck_ramp_table),
 		.desc.of_map_mode = da9062_map_buck_mode,
 		.sleep = REG_FIELD(DA9062AA_VBUCK4_A,
 			__builtin_ffs((int)DA9062AA_BUCK4_SL_A_MASK) - 1,
